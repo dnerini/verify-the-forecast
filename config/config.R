@@ -21,15 +21,22 @@ list.ws = c("OTL","LUG","SMA","GVE","BER","SIO","BAS","TAE","LUZ","COY","STG",
 
 # Variables
 
-list.var                = c("tmax.degrees", "tmin.degrees", "precip.mm.day", 
-                            "sunshine.min.day")
+list.var                = c("tmax.degrees", "tmin.degrees", "precip.mm", 
+                            "sunshine.min")
 list.var.obs            = c("tavg.degrees", "tmin.degrees", "tmax.degrees", 
-                            "precip.mm.day", "sunshine.min.day")
+                            "precip.mm", "sunshine.min")
 list.var.long           = c("Daily maximum temperature","Daily minimum temperature",
                             "Daily total precipitation", "Daily total sunshine")
 list.units.short        = c("°C", "°C", "mm", "min")
-list.skill.scores.short = c("MAE","RMSE","ME")
-list.skill.scores.long  = c("Mean absolute error","Root mean squared error","Mean error")
+
+list.skill.scores.short = c("MAE","RMSE","ME","Corr","Scatter",
+                            "CSI","GSS","HK","HSS","SEDI")
+list.skill.scores.long  = c("Mean absolute error","Root mean squared error","Mean error","Correlation","Scatter",
+                            "Critical success index","Gilbert skill score","Hanssen-Kuipers discriminant",
+                            "Heidke skill score ","Symmetric extremal dependency index")
+list.skill.scores.cont.short = c("MAE","RMSE","ME","Corr","Scatter")
+list.skill.scores.cat.short  = c("CSI","GSS","HK","HSS","SEDI")
+
 
 # Providers
 

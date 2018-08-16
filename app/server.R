@@ -49,20 +49,20 @@ shinyServer(function(input, output) {
         dbDisconnect(db.con)
         
         if(length(fct.df[[input$var]])>0){
-          fct.df          = data.frame(fct.df["fct.time"], fct.df["leadtime.days"], fct.df[[input$var]], fix.empty.names=FALSE)
+          fct.df          = data.frame(fct.df["forecast.time"], fct.df["leadtime.days"], fct.df[[input$var]], fix.empty.names=FALSE)
           fct.df_         = fct.df[, 3]
           fct.df_[fct.df_ == -2147483648.0] = NA
           fct.df[, 3]     = fct.df_
         }else{
-          fct.df          = data.frame(fct.df["fct.time"], fct.df["leadtime.days"], array(NA, nrow(fct.df)), fix.empty.names=FALSE)
+          fct.df          = data.frame(fct.df["forecast.time"], fct.df["leadtime.days"], array(NA, nrow(fct.df)), fix.empty.names=FALSE)
         }
-        colnames(fct.df)  = c("fct.time", "leadtime.days", input$var)
+        colnames(fct.df)  = c("forecast.time", "leadtime.days", input$var)
         
         # keep only relevant lead times
         fct.df = fct.df[fct.df$leadtime.days <= input$leadtime,]
 
         # co-locate obsevations to forecasts
-        all.df_ = merge(obs.df, fct.df, by.y = "fct.time", by.x = "obs.time")
+        all.df_ = merge(obs.df, fct.df, by.y = "forecast.time", by.x = "obs.time")
         
         if(nrow(all.df_)>0){
           all.df_$provider = input$forecasts[j]
@@ -78,9 +78,12 @@ shinyServer(function(input, output) {
     
 # -- Do the verification -------------------------------------------------------
     
-    the.score  = which(list.skill.scores.short == input$score)
     the.var    = which(list.var == input$var)
-    
+    if(input$type=="Continuous"){
+      the.score  = list.skill.scores.short == input$contscore
+    }else{
+      the.score  = list.skill.scores.short == input$catscore
+    }
     all.df = all.df[is.finite(all.df[[input$var]]),]
     
     for (j in 1:nfor){
@@ -96,11 +99,16 @@ shinyServer(function(input, output) {
         nlt = length(lt)
         y   = array(NA, nlt)
         
+        r = parse.thr(input$thr)
+        thr = r$thr
+        ineq = r$ineq
+        
         for(t in 1:nlt){
           this.lt = all.df_$leadtime.days == lt[t]
           obs     = as.numeric(all.df_[[input$var]])[this.lt]
           fct     = as.numeric(all.df_[[paste0(input$var,".obs")]])[this.lt]
-          y[t]    = error.function(obs, fct, input$score)
+          y[t]    = error.function(obs, fct, list.skill.scores.short[the.score], thr, ineq)
+          
         } # for t nlt
         
         err.df_ = data.frame(row.names=lt, y) 
@@ -131,8 +139,8 @@ shinyServer(function(input, output) {
     err.df = err.df[is.finite(err.df$error),]
     colnames(err.df) = c("leadtime.days", "provider", "error")
     
-    title = paste0("Forecast ", tolower(list.skill.scores.long[the.score])," in ",
-                   tolower(list.var.long[the.var])," [",list.units.short[the.var],"] ")
+    title = paste0("Forecast ", tolower(list.skill.scores.long[the.score]), " in ",
+                   tolower(list.var.long[the.var]), " [", list.units.short[the.var], "] ")
     
     # ggplot2
     
@@ -140,7 +148,12 @@ shinyServer(function(input, output) {
     g = g + ggtitle(title)
     g = g + geom_line(size=1.2) + geom_point()
     g = g + scale_colour_manual(values = color.arr)
-    g = g + labs(x='Forecast range in days', y=input$score, color=NULL)
+    if(input$type == "Continuous"){
+      ytitle = list.skill.scores.short[the.score]
+     }else{
+      ytitle = paste0(list.skill.scores.short[the.score], " (", ineq, thr, list.units.short[the.var], ")")
+     }
+    g = g + labs(x='Forecast range in days', y=ytitle, color=NULL)
     g = g + scale_x_continuous(breaks=seq(xmin, xmax, 1), limits=c(xmin, xmax))
     
     # theme
@@ -149,10 +162,12 @@ shinyServer(function(input, output) {
     g = g + theme(axis.text=element_text(size=14),
                   axis.title=element_text(size=16))
     g = g + theme(legend.text=element_text(size=14),
-                  legend.position=c(.20, .95),
-                  legend.justification=c("right", "top"),
-                  legend.box.just="right",
-                  legend.margin=margin(6, 6, 6, 6))
+                  legend.position = "bottom")
+    #g = g + theme(legend.text=element_text(size=14),
+    #              legend.position=c(.20, .95),
+    #              legend.justification=c("right", "top"),
+    #              legend.box.just="right",
+    #              legend.margin=margin(6, 6, 6, 6))
     print(g)
   })
   
