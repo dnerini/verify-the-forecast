@@ -299,7 +299,7 @@ extract.daily.fct  <- function(plz, provider){
     # Precip
     precip.mm = xpathSApply(fct.html.parsed, "//*/td", xmlValue)
     precip.mm = unlist(strsplit(precip.mm, "\n"))
-    precip.mm = gsub("[^0-9\\.\\-]", "", precip.mm)
+    precip.mm = gsub("[^0-9\\.\\-\\>\\<]", "", precip.mm)
     precip.mm = precip.mm[!(precip.mm %in% c("", "|"))]
     idxMax = which(rollapply(as.numeric(precip.mm), length(tmax.degrees), identical, tmax.degrees))
     precip.mm = precip.mm[(idxMax + 4*length(tmax.degrees)):(idxMax + 5*length(tmax.degrees) - 1)]
@@ -313,6 +313,9 @@ extract.daily.fct  <- function(plz, provider){
       }else if(grepl(">", this.precip)){
         gt = as.numeric(gsub(">", "", this.precip))
         precip.mm[k] = gt + 0.1
+      }else if(grepl("<", this.precip)){
+        lt = as.numeric(gsub("<", "", this.precip))
+        precip.mm[k] = round(runif(1, 0, lt), 1)
       }else{
         precip.mm[k] = NA
       } # if
