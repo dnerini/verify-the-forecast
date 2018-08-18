@@ -40,8 +40,8 @@ list.skill.scores.cat.short  = c("CSI","GSS","HK","HSS","SEDI")
 
 # Providers
 
-list.providers        = c("mch", "srf", "meteoblue")
-list.providers.labels = c("MeteoSwiss","SRF Meteo", "meteoblue") 
+list.providers        = c("mch", "srf", "meteoblue", "meteonews")
+list.providers.labels = c("MeteoSwiss","SRF Meteo", "meteoblue", "MeteoNews") 
 
 # Municipalities
 
