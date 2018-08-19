@@ -11,6 +11,7 @@ library(jsonlite)
 library(RCurl)
 library(sqldf)
 library(XML)
+library(zoo)
 
 # -- List of parameters --------------------------------------------------------
 

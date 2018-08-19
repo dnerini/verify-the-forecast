@@ -299,14 +299,16 @@ extract.daily.fct  <- function(plz, provider){
     # Precip
     precip.mm = xpathSApply(fct.html.parsed, "//*/td", xmlValue)
     precip.mm = unlist(strsplit(precip.mm, "\n"))
-    precip.mm = gsub("[^0-9\\.\\-\\>\\<]", "", precip.mm)
+    precip.mm = gsub("[^<>0-9.-]", "", precip.mm)
     precip.mm = precip.mm[!(precip.mm %in% c("", "|"))]
     idxMax = which(rollapply(as.numeric(precip.mm), length(tmax.degrees), identical, tmax.degrees))
     precip.mm = precip.mm[(idxMax + 4*length(tmax.degrees)):(idxMax + 5*length(tmax.degrees) - 1)]
     for(k in 1:length(precip.mm)){
       this.precip = precip.mm[k]
-      if(this.precip == "" | this.precip == "0" | this.precip == "-"){
+      if(this.precip == "" | this.precip == "-"){
         precip.mm[k] = 0.0
+      }else if(nchar(this.precip) == 1){
+        precip.mm[k] = as.numeric(this.precip)
       }else if(nchar(this.precip) > 1 & grepl("-", this.precip)){ # sample random value within the given interval
         minmax = as.numeric(unlist(strsplit(this.precip, "-")))
         precip.mm[k] = round(runif(1, minmax[1], minmax[2]),1)
