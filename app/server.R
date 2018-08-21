@@ -19,6 +19,22 @@ shinyServer(function(input, output) {
     aplz = get.plz(input$region)
     nplz = length(aplz)
     
+    # is it a categorical score
+    if(input$score %in% list.skill.scores.cat.short & !is.null(input$thr)){
+      output$thr <- renderUI({
+        textInput("thr", "Threshold", value = input$thr, width="27.5%")
+      })
+      thrin = input$thr
+    }else if(input$score %in% list.skill.scores.cat.short & is.null(input$thr)){
+      output$thr <- renderUI({
+        textInput("thr", "Threshold", value = ">20", width="27.5%")
+      })
+      thrin = ">20"
+    }else{
+      thrin = NA
+    }
+    print(thrin)
+    
     for (k in 1:nplz){
       
       plz = aplz[k]
@@ -89,11 +105,7 @@ shinyServer(function(input, output) {
 # -- Do the verification -------------------------------------------------------
     
     the.var    = which(list.var == input$var)
-    if(input$type=="Continuous"){
-      the.score  = list.skill.scores.short == input$contscore
-    }else{
-      the.score  = list.skill.scores.short == input$catscore
-    }
+    the.score  = list.skill.scores.short == input$score
     all.df = all.df[is.finite(all.df[[input$var]]),]
     
     for (j in 1:nfor){
@@ -109,7 +121,7 @@ shinyServer(function(input, output) {
         nlt = length(lt)
         y   = array(NA, nlt)
         
-        r = parse.thr(input$thr)
+        r = parse.thr(thrin)
         thr = r$thr
         ineq = r$ineq
         
@@ -150,7 +162,8 @@ shinyServer(function(input, output) {
     err.df = err.df[is.finite(err.df$error),]
     colnames(err.df) = c("leadtime.days", "provider", "error")
     
-    title = paste0("Forecast ", tolower(list.skill.scores.long[the.score]), " in\n",
+    title = paste0("Forecast ", tolower(list.skill.scores.long[the.score]), " (", 
+                   list.skill.scores.short[the.score],") in\n",
                    tolower(list.var.long[the.var]), " [", list.units.short[the.var], "]\n",
                    strftime(timebounds[1], format="%Y-%m-%d"), " - ", strftime(timebounds[2], format="%Y-%m-%d"))
 
@@ -160,7 +173,7 @@ shinyServer(function(input, output) {
     g = g + ggtitle(title)
     g = g + geom_line(size=1.2) + geom_point()
     g = g + scale_colour_manual(values = color.arr)
-    if(input$type == "Continuous"){
+    if(input$score %in% list.skill.scores.cont.short){
       ytitle = list.skill.scores.short[the.score]
      }else{
       ytitle = paste0(list.skill.scores.short[the.score], " (", ineq, thr, list.units.short[the.var], ")")
