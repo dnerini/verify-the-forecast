@@ -150,9 +150,10 @@ shinyServer(function(input, output) {
     err.df = err.df[is.finite(err.df$error),]
     colnames(err.df) = c("leadtime.days", "provider", "error")
     
-    title = paste0("Forecast ", tolower(list.skill.scores.long[the.score]), " in ",
-                   tolower(list.var.long[the.var]), " [", list.units.short[the.var], "] ")
-    
+    title = paste0("Forecast ", tolower(list.skill.scores.long[the.score]), " in\n",
+                   tolower(list.var.long[the.var]), " [", list.units.short[the.var], "]\n",
+                   strftime(timebounds[1], format="%Y-%m-%d"), " - ", strftime(timebounds[2], format="%Y-%m-%d"))
+
     # ggplot2
     
     g = ggplot(err.df, aes(x=leadtime.days, y=error, color=provider))
