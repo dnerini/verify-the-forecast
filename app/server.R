@@ -24,6 +24,17 @@ shinyServer(function(input, output) {
       plz = aplz[k]
       ws  = list.ws[list.plz==plz]
       
+      # define time interval
+      if(input$range == "last week"){
+        timebounds     = as.POSIXct(paste(c(Sys.Date() - 7, Sys.Date()), '00:00'), format='%Y-%m-%d %H:%M', tz='Europe/Berlin')
+      }else if (input$range == "last month"){
+        timebounds     = as.POSIXct(paste(c(Sys.Date() - 31, Sys.Date()), '00:00'), format='%Y-%m-%d %H:%M', tz='Europe/Berlin')
+      }else if (input$range == "last year"){
+        timebounds     = as.POSIXct(paste(c(Sys.Date() - 365, Sys.Date()), '00:00'), format='%Y-%m-%d %H:%M', tz='Europe/Berlin')
+      }else if (input$range == "select"){
+        timebounds     = as.POSIXct(paste(input$daterange1, '00:00'), format='%Y-%m-%d %H:%M', tz='Europe/Berlin')
+      }
+
       # extract observations
       db.fn  = file.path(base.dir, "data", db.name.obs)
       db.con = dbConnect(SQLite(), dbname=db.fn)
@@ -32,8 +43,7 @@ shinyServer(function(input, output) {
       obs.df = data.frame(obs.df["obs.time"], obs.df[[input$var]], fix.empty.names=FALSE)
       colnames(obs.df) = c("obs.time", paste0(input$var,'.obs'))
       
-      # select dates
-      timebounds     = as.POSIXct(paste(input$daterange1, '00:00'), format='%Y-%m-%d %H:%M', tz='Europe/Berlin')
+      # filter dates
       timestamps.fct = as.POSIXct(paste(obs.df$obs.time, '00:00'), format='%Y-%m-%d %H:%M', tz='Europe/Berlin')
       idxKeep        = timestamps.fct >= timebounds[1] & timestamps.fct <= timebounds[2]
       obs.df         = obs.df[idxKeep,]
@@ -107,8 +117,9 @@ shinyServer(function(input, output) {
           this.lt = all.df_$leadtime.days == lt[t]
           obs     = as.numeric(all.df_[[input$var]])[this.lt]
           fct     = as.numeric(all.df_[[paste0(input$var,".obs")]])[this.lt]
-          y[t]    = error.function(obs, fct, list.skill.scores.short[the.score], thr, ineq)
-          
+          if(length(obs)>0){
+            y[t]    = error.function(obs, fct, list.skill.scores.short[the.score], thr, ineq)
+          }
         } # for t nlt
         
         err.df_ = data.frame(row.names=lt, y) 
