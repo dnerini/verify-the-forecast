@@ -127,8 +127,8 @@ shinyServer(function(input, output) {
         
         for(t in 1:nlt){
           this.lt = all.df_$leadtime.days == lt[t]
-          obs     = as.numeric(all.df_[[input$var]])[this.lt]
-          fct     = as.numeric(all.df_[[paste0(input$var,".obs")]])[this.lt]
+          fct     = as.numeric(all.df_[[input$var]])[this.lt]
+          obs     = as.numeric(all.df_[[paste0(input$var,".obs")]])[this.lt]
           if(length(obs)>0){
             y[t]    = error.function(obs, fct, list.skill.scores.short[the.score], thr, ineq)
           }
