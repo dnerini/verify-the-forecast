@@ -33,7 +33,6 @@ shinyServer(function(input, output) {
     }else{
       thrin = NA
     }
-    print(thrin)
     
     for (k in 1:nplz){
       
@@ -41,14 +40,15 @@ shinyServer(function(input, output) {
       ws  = list.ws[list.plz==plz]
       
       # define time interval
+      tz = 'GMT'
       if(input$range == "last week"){
-        timebounds     = as.POSIXct(paste(c(Sys.Date() - 7, Sys.Date()), '00:00'), format='%Y-%m-%d %H:%M', tz='Europe/Berlin')
+        timebounds     = as.POSIXct(paste(c(Sys.Date() - 7, Sys.Date()), '00:00'), format='%Y-%m-%d %H:%M', tz=tz)
       }else if (input$range == "last month"){
-        timebounds     = as.POSIXct(paste(c(Sys.Date() - 31, Sys.Date()), '00:00'), format='%Y-%m-%d %H:%M', tz='Europe/Berlin')
+        timebounds     = as.POSIXct(paste(c(Sys.Date() - 31, Sys.Date()), '00:00'), format='%Y-%m-%d %H:%M', tz=tz)
       }else if (input$range == "last year"){
-        timebounds     = as.POSIXct(paste(c(Sys.Date() - 365, Sys.Date()), '00:00'), format='%Y-%m-%d %H:%M', tz='Europe/Berlin')
+        timebounds     = as.POSIXct(paste(c(Sys.Date() - 365, Sys.Date()), '00:00'), format='%Y-%m-%d %H:%M', tz=tz)
       }else if (input$range == "select"){
-        timebounds     = as.POSIXct(paste(input$daterange1, '00:00'), format='%Y-%m-%d %H:%M', tz='Europe/Berlin')
+        timebounds     = as.POSIXct(paste(input$daterange1, '00:00'), format='%Y-%m-%d %H:%M', tz=tz)
       }
 
       # extract observations
@@ -60,7 +60,7 @@ shinyServer(function(input, output) {
       colnames(obs.df) = c("obs.time", paste0(input$var,'.obs'))
       
       # filter dates
-      timestamps.fct = as.POSIXct(paste(obs.df$obs.time, '00:00'), format='%Y-%m-%d %H:%M', tz='Europe/Berlin')
+      timestamps.fct = as.POSIXct(paste(obs.df$obs.time, '00:00'), format='%Y-%m-%d %H:%M', tz=tz)
       idxKeep        = timestamps.fct >= timebounds[1] & timestamps.fct <= timebounds[2]
       obs.df         = obs.df[idxKeep,]
       
